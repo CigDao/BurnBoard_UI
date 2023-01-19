@@ -10,8 +10,8 @@ const columns: GridColDef[] = [
   { field: 'rank', headerName: 'Rank', width: 10, sortable: false, renderCell: (params) => <Typography variant="button" display="block" gutterBottom>{params.value}</Typography> },
   { field: 'avatar', headerName: 'Avatar', width: 65, filterable: false, sortable: false, renderCell: (params) => <img width="50" src={params.value} /> },
   { field: 'principal', headerName: 'Principal', width: 500, sortable: false },
-  { field: 'earnedAmount', headerName: 'Earned Amount', filterable: false, width: 130, sortable: false },
-  { field: 'burnedAmount', headerName: 'Burned Amount', filterable: false, width: 130, sortable: false }
+  { field: 'earnedAmount', headerName: 'Earned Amount', filterable: false, width: 180, sortable: false },
+  { field: 'burnedAmount', headerName: 'Burned Amount', filterable: false, width: 180, sortable: false }
 ];
 
 
@@ -83,6 +83,7 @@ export default function BurnTable() {
           loading={loading}
           rowCount={rowCountState}
           rowsPerPageOptions={[50]}
+          
           components={{ Toolbar: GridToolbar }}
           getRowClassName={(params) => {
             return params.id === principal ? "selected-row" : "";
