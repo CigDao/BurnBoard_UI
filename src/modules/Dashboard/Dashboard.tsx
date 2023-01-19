@@ -1,11 +1,11 @@
-import { Box, Button, Container, Divider, Input, ListItem, ListItemAvatar, ListItemText, Paper, TextField, Tooltip, Typography, useMediaQuery } from '@mui/material';
+import { Alert, Avatar, Box, Button, Container, Divider, Input, ListItem, ListItemAvatar, ListItemText, Paper, Stack, TextField, Tooltip, Typography, useMediaQuery } from '@mui/material';
 import http, { CombinedReflection, Reflection, Transaction } from '@utils/http';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '@assets/images/cig_logo.png';
 import { _SERVICE as _TAXCOLLECTOR_ACTOR } from '../../declarations/taxcollector';
 import { _SERVICE as _tokenService } from '../../declarations/token';
-
+import Confetti from 'react-confetti'
 import Loading from '@components/Loading/Loading';
 import bigDecimal from 'js-big-decimal';
 import { theme } from '@misc/theme';
@@ -15,6 +15,7 @@ import { useCanister, useWallet } from '@connect2ic/react';
 import { Principal } from '@dfinity/principal';
 import { DECIMALS, bigIntToDecimal, bigIntToDecimalPrettyString } from '@utils/util';
 import { LoadingButton } from '@mui/lab';
+import { CurrencyExchange, Fireplace, SavingsRounded, StarsOutlined } from '@mui/icons-material';
 
 export default function Dashboard() {
 	const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -22,6 +23,10 @@ export default function Dashboard() {
 	const [myBurntAmount, setMyBurntAmount] = useState(0n);
 	const [myEarnedAmount, setMyEarnedAmount] = useState(0n);
 	const [burnAmount, setBurnAmount] = useState('');
+	const [burnRank, setBurnRank] = useState('');
+	const [showSuccess, setShowSuccess] = useState(false);
+
+
 	const [isLoading, setIsLoading] = useState(false);
 	const [isButtonsLoading, setButtonsLoading] = useState(false);
 
@@ -42,11 +47,28 @@ export default function Dashboard() {
 	}, [wallet?.isConnected]);
 
 	async function getBurnAmount() {
-		const burn = await taxCollectorActor.getBurner(Principal.fromText(wallet?.principal || ""));
+		const principal = Principal.fromText(wallet?.principal || "");
+		const promises = await Promise.all([taxCollectorActor.getBurner(principal), taxCollectorActor.fetchTopBurners()]);
+
+		const burn = promises[0];
 		const earnedAmount = burn[0]?.earnedAmount || 0n;
 		const burnedAmount = burn[0]?.burnedAmount || 0n;
 		setMyEarnedAmount(earnedAmount);
 		setMyBurntAmount(burnedAmount);
+
+		let topBurners = promises[1];
+		for (let index = 0; index < topBurners.length; index++) {
+			const element = topBurners[index];
+			if (element[0].toString() === wallet?.principal) {
+				setShowSuccess(true);
+				setBurnRank(String(index + 1));
+				break;
+			}
+		}
+
+		setTimeout(() => setShowSuccess(false), 6000);
+
+
 	}
 
 	async function intialize() {
@@ -116,19 +138,48 @@ export default function Dashboard() {
 					</ListItem>
 				</Paper>
 				{wallet?.isConnected && <>
+					{burnRank &&
 					<Paper sx={{ bgcolor: theme => theme.palette.secondary.light, marginBottom: 2 }}>
 						<ListItem>
 							<ListItemAvatar>
-								<TransactionAvatar transactionType='reflections' />
+							<Avatar sx={{ bgcolor: '#E6E8C9' }}>
+								<StarsOutlined color='secondary' />
+							</Avatar>							
+							</ListItemAvatar>
+							<ListItemText sx={{ width: '50%' }} primary='My Burnt Rank' secondary={(burnRank)} />
+						</ListItem>
+						{showSuccess &&
+							<Stack sx={{ position: "fixed", top: "100px", left: 0 }}>
+								<Alert severity="success" >
+									Congratulations you are ranked {burnRank} and will recieve extra reflections
+								</Alert>
+							</Stack>
+						}
+						<Confetti
+						recycle={false}
+						width={window.innerWidth}
+						height={window.innerHeight}
+						/>
+					</Paper>
+
+					}
+					<Paper sx={{ bgcolor: theme => theme.palette.secondary.light, marginBottom: 2 }}>
+						<ListItem>
+						<ListItemAvatar>
+							<Avatar sx={{ bgcolor: '#E6E8C9' }}>
+								<Fireplace color='secondary' />
+							</Avatar>							
 							</ListItemAvatar>
 							<ListItemText sx={{ width: '50%' }} primary='My Burnt Amount' secondary={bigIntToDecimalPrettyString(myBurntAmount)} />
 						</ListItem>
 					</Paper>
 					<Paper sx={{ bgcolor: theme => theme.palette.secondary.light }}>
 					<ListItem>
-						<ListItemAvatar>
-							<TransactionAvatar transactionType='reflections' />
-						</ListItemAvatar>
+					<ListItemAvatar>
+							<Avatar sx={{ bgcolor: '#E6E8C9' }}>
+								<CurrencyExchange color='secondary' />
+							</Avatar>							
+							</ListItemAvatar>
 						<ListItemText sx={{ width: '50%' }} primary='My Earned Amount' secondary={bigIntToDecimalPrettyString(myEarnedAmount)} />
 					</ListItem>
 				</Paper>
@@ -146,9 +197,10 @@ export default function Dashboard() {
 				CIGDAO BurnBoard
 			</Typography>
 			<Typography color='primary' variant='h6' sx={{ marginTop: 0 }}>
-				Burn tokens by voting, transfering, buying, or bellow
+				Top Burners get extra rewards, bezt way to burn is to <a target={"_blank"} href="https://dao.cigdao.com">vote</a> 
 			</Typography>
-			{renderBurnBar()}
+			{/* {renderBurnBar()} */}
+
 			<Box sx={{ width: '100%', paddingY: 1 }}>
 				{isLoading ? (
 					<Loading />

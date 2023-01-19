@@ -7,7 +7,7 @@ import { bigIntToDecimalPrettyString } from '@utils/util';
 import { AvatarGenerator } from 'random-avatar-generator';
 
 const columns: GridColDef[] = [
-  { field: 'avatar', headerName: 'Avatar', width: 75, sortable: false, renderCell: (params) => <img width="50" src={params.value} /> },
+  { field: 'avatar', headerName: 'Avatar', width: 65, sortable: false, renderCell: (params) => <img width="50" src={params.value} /> },
   { field: 'principal', headerName: 'Principal', width: 500, sortable: false },
   { field: 'earnedAmount', headerName: 'Earned Amount', width: 130, sortable: false },
   { field: 'burnedAmount', headerName: 'Burned Amount', width: 130, sortable: false }
@@ -39,27 +39,31 @@ export default function BurnTable() {
   }
 
 
-  async function nextPage(start: number) {
+  async function nextPage(page: number) {
+    const start = page === 0 ? 0 : page + pageSize;
     const burnerPage = await taxCollectorActor.fetchBurners(BigInt(start), BigInt(pageSize));
     const innerRow: any[] = [];
-    burnerPage.forEach((burner) => {
+    for (let index = 0; index < burnerPage.length; index++) {
+      const burner = burnerPage[index];
       const principal = burner[0];
       const burnedAmount = burner[1].burnedAmount;
       const earnedAmount = burner[1].earnedAmount;
-      innerRow.push({
-        principal: principal.toString(), 
-        earnedAmount: bigIntToDecimalPrettyString(earnedAmount) + ' YC', 
-        burnedAmount: bigIntToDecimalPrettyString(burnedAmount) + ' YC',
-        avatar: generator.generateRandomAvatar(principal.toString())
-      });
-    });
-
+      if (principal.toString() !== "6ox57-5aaaa-aaaap-qaw4q-cai") {
+        innerRow.push({
+          principal: principal.toString(), 
+          earnedAmount: bigIntToDecimalPrettyString(earnedAmount) + ' YC', 
+          burnedAmount: bigIntToDecimalPrettyString(burnedAmount) + ' YC',
+          avatar: generator.generateRandomAvatar(principal.toString())
+        });
+      }
+    }
     setRows(innerRow);
   }
 
 
   function pageChange(inPage: number) {
     setLoading(true);
+    console.log(inPage)
     nextPage(inPage).then(() => {
       setPage(inPage);
       setLoading(false);
