@@ -1,18 +1,11 @@
 import * as React from 'react';
-import { DataGrid, GridColDef, GridToolbar, GridValueGetterParams } from '@mui/x-data-grid';
-import { Paper, Typography } from '@mui/material';
+import { DataGrid, GridColDef, GridToolbar, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarFilterButton, GridToolbarQuickFilter, GridValueGetterParams } from '@mui/x-data-grid';
+import { Paper, Typography, useMediaQuery } from '@mui/material';
 import { useCanister, useConnect } from '@connect2ic/react';
 import { _SERVICE as _TAXCOLLECTOR_ACTOR } from '../../declarations/taxcollector';
 import { bigIntToDecimalPrettyString } from '@utils/util';
 import { AvatarGenerator } from 'random-avatar-generator';
-
-const columns: GridColDef[] = [
-  { field: 'rank', headerName: 'Rank', width: 10, sortable: false, renderCell: (params) => <Typography variant="button" display="block" gutterBottom>{params.value}</Typography> },
-  { field: 'avatar', headerName: 'Avatar', width: 65, filterable: false, sortable: false, renderCell: (params) => <img width="50" src={params.value} /> },
-  { field: 'principal', headerName: 'Principal', width: 500, sortable: false },
-  { field: 'earnedAmount', headerName: 'Earned Amount', filterable: false, width: 180, sortable: false },
-  { field: 'burnedAmount', headerName: 'Burned Amount', filterable: false, width: 180, sortable: false }
-];
+import { theme } from '@misc/theme';
 
 
 export default function BurnTable() {
@@ -26,7 +19,22 @@ export default function BurnTable() {
   const [rowCountState, setRowCountState] = React.useState (0);
   const generator = new AvatarGenerator();
 	const { principal } = useConnect();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
 
+  const columns: GridColDef[] = [
+    { field: 'rank', headerName: 'Rank', 
+    width: 10, sortable: false, 
+    renderCell: (params) => <Typography variant="button" display="block" gutterBottom>{params.value}</Typography> },
+    { field: 'avatar', headerName: 'Avatar',
+    width: 65, filterable: false, sortable: false, renderCell: (params) => <img width="50" src={params.value} /> },
+    { field: 'principal', headerName: 'Principal', 
+    width: isSmallScreen ? 100 : 500, sortable: false, renderCell: (params) => isSmallScreen ? params.value.slice(0, 4) + "..." + params.value.slice(params.value.length - 3, params.value.length) : params.value},
+    { field: 'earnedAmount', headerName: 'Earned', filterable: false, 
+    width: isSmallScreen ? 100 : 180, sortable: false },
+    { field: 'burnedAmount', headerName: 'Burned', filterable: false,
+     width: isSmallScreen ? 100 : 180, sortable: false }
+  ];
+  
   React.useEffect(() => {
     intialize().then(()=> {
       setLoading(false);
@@ -72,6 +80,15 @@ export default function BurnTable() {
     });
   }
 
+  function CustomToolbar() {
+    return (
+      <GridToolbarContainer>
+        <GridToolbarQuickFilter />
+        <GridToolbarColumnsButton />
+      </GridToolbarContainer>
+    );
+  }
+
   return (
       <Paper className='mui-button-override' sx={{ bgcolor: 'white', height: 1200, width: '100%' }}>
         <DataGrid
@@ -83,8 +100,16 @@ export default function BurnTable() {
           loading={loading}
           rowCount={rowCountState}
           rowsPerPageOptions={[50]}
-          
-          components={{ Toolbar: GridToolbar }}
+          initialState={{
+            columns: {
+              columnVisibilityModel: {
+                // Hide columns status and traderName, the other columns will remain visible
+                avatar: !isSmallScreen,
+                rank: !isSmallScreen,
+              },
+            },
+          }}
+          components={{ Toolbar: CustomToolbar }}
           getRowClassName={(params) => {
             return params.id === principal ? "selected-row" : "";
           }}
