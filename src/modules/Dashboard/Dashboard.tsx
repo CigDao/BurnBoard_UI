@@ -11,14 +11,13 @@ import bigDecimal from 'js-big-decimal';
 import { theme } from '@misc/theme';
 import { TransactionAvatar } from '@components/TransactionAvatar/TransactionAvatar';
 import BurnTable from '@modules/BurnTable/BurnTable';
-import { useCanister, useWallet } from '@connect2ic/react';
+import { useCanister, useConnect, useWallet } from '@connect2ic/react';
 import { Principal } from '@dfinity/principal';
 import { DECIMALS, bigIntToDecimal, bigIntToDecimalPrettyString } from '@utils/util';
 import { LoadingButton } from '@mui/lab';
 import { CurrencyExchange, Fireplace, SavingsRounded, StarsOutlined } from '@mui/icons-material';
 
 export default function Dashboard() {
-	const [transactions, setTransactions] = useState<Transaction[]>([]);
 	const [burnt, setBurnt] = useState(0);
 	const [myBurntAmount, setMyBurntAmount] = useState(0n);
 	const [myEarnedAmount, setMyEarnedAmount] = useState(0n);
@@ -35,21 +34,21 @@ export default function Dashboard() {
 	const taxCollectorActor = _taxcollectorActor as unknown as _TAXCOLLECTOR_ACTOR;
 	const [_tokenActor] = useCanister('token');
 	const tokenActor = _tokenActor as unknown as _tokenService;
-	const [wallet] = useWallet()
+	const { isConnected, principal } = useConnect();
 	useEffect(() => {
 		intialize();
 	}, []);
 
 	useEffect(() => {
-		if (wallet?.isConnected) {
+		console.log(isConnected)
+		if (isConnected) {
 			getBurnAmount();
 		}
-	}, [wallet?.isConnected]);
+	}, [isConnected]);
 
 	async function getBurnAmount() {
-		const principal = Principal.fromText(wallet?.principal || "");
-		const promises = await Promise.all([taxCollectorActor.getBurner(principal), taxCollectorActor.fetchTopBurners()]);
-
+		const innerPrincipal = Principal.fromText(principal || "");
+		const promises = await Promise.all([taxCollectorActor.getBurner(innerPrincipal), taxCollectorActor.fetchTopBurners()]);
 		const burn = promises[0];
 		const earnedAmount = burn[0]?.earnedAmount || 0n;
 		const burnedAmount = burn[0]?.burnedAmount || 0n;
@@ -59,7 +58,7 @@ export default function Dashboard() {
 		let topBurners = promises[1];
 		for (let index = 0; index < topBurners.length; index++) {
 			const element = topBurners[index];
-			if (element[0].toString() === wallet?.principal) {
+			if (element[0].toString() === principal) {
 				setShowSuccess(true);
 				setBurnRank(String(index + 1));
 				break;
@@ -74,10 +73,7 @@ export default function Dashboard() {
 	async function intialize() {
 		try {
 			setIsLoading(true);
-			const promises = await Promise.all([http.fetchTransactions(), http.getBurnt()]);
-			let transactions = promises[0];
-			setTransactions(transactions);
-			let burnt = promises[1];
+			let burnt = await http.getBurnt();
 			setBurnt(burnt);
 		} catch (error) {
 			console.log(error);
@@ -92,7 +88,7 @@ export default function Dashboard() {
 
 	async function getMax() {
 		setButtonsLoading(true);
-		const allTokens = await tokenActor.balanceOf(Principal.fromText(wallet?.principal || ""));
+		const allTokens = await tokenActor.balanceOf(Principal.fromText(principal || ""));
 		setBurnAmount(bigIntToDecimal(allTokens).getValue());
 		setButtonsLoading(false);
 	}
@@ -137,7 +133,7 @@ export default function Dashboard() {
 						<ListItemText sx={{ width: '50%' }} primary='Total Burned Amount' secondary={new bigDecimal(burnt / 100000000).getPrettyValue(3, ',') + ' YC'} />
 					</ListItem>
 				</Paper>
-				{wallet?.isConnected && <>
+				{isConnected && <>
 					{burnRank &&
 					<Paper sx={{ bgcolor: theme => theme.palette.secondary.light, marginBottom: 2 }}>
 						<ListItem>
@@ -170,7 +166,7 @@ export default function Dashboard() {
 								<Fireplace color='secondary' />
 							</Avatar>							
 							</ListItemAvatar>
-							<ListItemText sx={{ width: '50%' }} primary='My Burnt Amount' secondary={bigIntToDecimalPrettyString(myBurntAmount)} />
+							<ListItemText sx={{ width: '50%' }} primary='My Burnt Amount' secondary={(myBurntAmount === 0n ? '0' : bigIntToDecimalPrettyString(myBurntAmount)) + " YC"} />
 						</ListItem>
 					</Paper>
 					<Paper sx={{ bgcolor: theme => theme.palette.secondary.light }}>
@@ -180,7 +176,7 @@ export default function Dashboard() {
 								<CurrencyExchange color='secondary' />
 							</Avatar>							
 							</ListItemAvatar>
-						<ListItemText sx={{ width: '50%' }} primary='My Earned Amount' secondary={bigIntToDecimalPrettyString(myEarnedAmount)} />
+						<ListItemText sx={{ width: '50%' }} primary='My Earned Amount' secondary={(myEarnedAmount === 0n ? '0' : bigIntToDecimalPrettyString(myEarnedAmount)) + " YC"} />
 					</ListItem>
 				</Paper>
 				</>

@@ -18,3 +18,15 @@ body {
     font-family: backcountry;
     src: url(./assets/fonts/BACKCOUNTRY-Regular.ttf);
   }
+
+.selected-row {
+  background-color: #e2bd81;
+}
+
+.selected-row:hover {
+  background-color: #e5a641;
+}
+
+.mui-button-override button {
+  color: black;
+}

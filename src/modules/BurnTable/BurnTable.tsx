@@ -1,17 +1,17 @@
 import * as React from 'react';
-import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridToolbar, GridValueGetterParams } from '@mui/x-data-grid';
 import { Paper, Typography } from '@mui/material';
-import { useCanister } from '@connect2ic/react';
+import { useCanister, useConnect } from '@connect2ic/react';
 import { _SERVICE as _TAXCOLLECTOR_ACTOR } from '../../declarations/taxcollector';
 import { bigIntToDecimalPrettyString } from '@utils/util';
 import { AvatarGenerator } from 'random-avatar-generator';
 
 const columns: GridColDef[] = [
   { field: 'rank', headerName: 'Rank', width: 10, sortable: false, renderCell: (params) => <Typography variant="button" display="block" gutterBottom>{params.value}</Typography> },
-  { field: 'avatar', headerName: 'Avatar', width: 65, sortable: false, renderCell: (params) => <img width="50" src={params.value} /> },
+  { field: 'avatar', headerName: 'Avatar', width: 65, filterable: false, sortable: false, renderCell: (params) => <img width="50" src={params.value} /> },
   { field: 'principal', headerName: 'Principal', width: 500, sortable: false },
-  { field: 'earnedAmount', headerName: 'Earned Amount', width: 130, sortable: false },
-  { field: 'burnedAmount', headerName: 'Burned Amount', width: 130, sortable: false }
+  { field: 'earnedAmount', headerName: 'Earned Amount', filterable: false, width: 130, sortable: false },
+  { field: 'burnedAmount', headerName: 'Burned Amount', filterable: false, width: 130, sortable: false }
 ];
 
 
@@ -25,6 +25,7 @@ export default function BurnTable() {
 	const taxCollectorActor = _taxcollectorActor as unknown as _TAXCOLLECTOR_ACTOR;
   const [rowCountState, setRowCountState] = React.useState (0);
   const generator = new AvatarGenerator();
+	const { principal } = useConnect();
 
   React.useEffect(() => {
     intialize().then(()=> {
@@ -72,7 +73,7 @@ export default function BurnTable() {
   }
 
   return (
-      <Paper sx={{ bgcolor: 'white', height: 1200, width: '100%' }}>
+      <Paper className='mui-button-override' sx={{ bgcolor: 'white', height: 1200, width: '100%' }}>
         <DataGrid
           rowHeight={75}
           getRowId={(row) => row.principal}
@@ -82,6 +83,10 @@ export default function BurnTable() {
           loading={loading}
           rowCount={rowCountState}
           rowsPerPageOptions={[50]}
+          components={{ Toolbar: GridToolbar }}
+          getRowClassName={(params) => {
+            return params.id === principal ? "selected-row" : "";
+          }}
           pagination
           page={page}
           pageSize={pageSize}
