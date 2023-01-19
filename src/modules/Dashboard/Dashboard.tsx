@@ -199,7 +199,7 @@ export default function Dashboard() {
 			<Typography color='primary' variant='h6' sx={{ marginTop: 0 }}>
 				Top Burners get extra rewards, best way to burn is to <a target={"_blank"} href="https://dao.cigdao.com">vote</a> 
 			</Typography>
-			{/* {renderBurnBar()} */}
+			{renderBurnBar()}
 
 			<Box sx={{ width: '100%', paddingY: 1 }}>
 				{isLoading ? (

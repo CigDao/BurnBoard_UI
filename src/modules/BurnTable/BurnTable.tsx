@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
-import { Paper } from '@mui/material';
+import { Paper, Typography } from '@mui/material';
 import { useCanister } from '@connect2ic/react';
 import { _SERVICE as _TAXCOLLECTOR_ACTOR } from '../../declarations/taxcollector';
 import { bigIntToDecimalPrettyString } from '@utils/util';
 import { AvatarGenerator } from 'random-avatar-generator';
 
 const columns: GridColDef[] = [
+  { field: 'rank', headerName: 'Rank', width: 10, sortable: false, renderCell: (params) => <Typography variant="button" display="block" gutterBottom>{params.value}</Typography> },
   { field: 'avatar', headerName: 'Avatar', width: 65, sortable: false, renderCell: (params) => <img width="50" src={params.value} /> },
   { field: 'principal', headerName: 'Principal', width: 500, sortable: false },
   { field: 'earnedAmount', headerName: 'Earned Amount', width: 130, sortable: false },
@@ -50,6 +51,7 @@ export default function BurnTable() {
       const earnedAmount = burner[1].earnedAmount;
       if (principal.toString() !== "6ox57-5aaaa-aaaap-qaw4q-cai") {
         innerRow.push({
+          rank: index + 1,
           principal: principal.toString(), 
           earnedAmount: bigIntToDecimalPrettyString(earnedAmount) + ' YC', 
           burnedAmount: bigIntToDecimalPrettyString(burnedAmount) + ' YC',
@@ -59,7 +61,6 @@ export default function BurnTable() {
     }
     setRows(innerRow);
   }
-
 
   function pageChange(inPage: number) {
     setLoading(true);
@@ -80,12 +81,11 @@ export default function BurnTable() {
           columns={columns}
           loading={loading}
           rowCount={rowCountState}
-          rowsPerPageOptions={[5, 10, 20, 50, 100]}
+          rowsPerPageOptions={[50]}
           pagination
           page={page}
           pageSize={pageSize}
           onPageChange={(newPage) => pageChange(newPage)}
-          onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
         />
       </Paper>
     );
