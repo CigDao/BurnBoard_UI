@@ -16,7 +16,7 @@ const columns: GridColDef[] = [
 
 export default function BurnTable() {
   const [page, setPage] = React.useState(0);
-  const [pageSize, setPageSize] = React.useState(10);
+  const [pageSize, setPageSize] = React.useState(50);
   const [loading, setLoading] = React.useState(true);
   const [rows, setRows] = React.useState<any[]>([]);
 
@@ -71,15 +71,16 @@ export default function BurnTable() {
   }
 
   return (
-      <Paper sx={{ bgcolor: 'white', height: 400, width: '100%' }}>
+      <Paper sx={{ bgcolor: 'white', height: 1200, width: '100%' }}>
         <DataGrid
+          rowHeight={75}
           getRowId={(row) => row.principal}
           paginationMode="server"
           rows={rows}
           columns={columns}
           loading={loading}
           rowCount={rowCountState}
-          rowsPerPageOptions={[5, 10, 20]}
+          rowsPerPageOptions={[5, 10, 20, 50, 100]}
           pagination
           page={page}
           pageSize={pageSize}
