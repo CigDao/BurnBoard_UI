@@ -197,7 +197,7 @@ export default function Dashboard() {
 				CIGDAO BurnBoard
 			</Typography>
 			<Typography color='primary' variant='h6' sx={{ marginTop: 0 }}>
-				Top Burners get extra rewards, bezt way to burn is to <a target={"_blank"} href="https://dao.cigdao.com">vote</a> 
+				Top Burners get extra rewards, best way to burn is to <a target={"_blank"} href="https://dao.cigdao.com">vote</a> 
 			</Typography>
 			{/* {renderBurnBar()} */}
 
