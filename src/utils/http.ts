@@ -202,13 +202,13 @@ async function fetchReflections(): Promise<CombinedReflection[]> {
 
 async function getReflectionCount(): Promise<number> {
 	return await (
-		await axios.get(urlBuilder(canisterIds.communityCanisterId, `reflectionCount`), { responseType: 'json' })
+		await axios.get(urlBuilder(canisterIds.tokenCanisterId, `reflectionCount`), { responseType: 'json' })
 	).data;
 }
 
 async function getReflectionAmount(): Promise<number> {
 	return await (
-		await axios.get(urlBuilder(canisterIds.communityCanisterId, `reflectionAmount`), { responseType: 'json' })
+		await axios.get(urlBuilder(canisterIds.tokenCanisterId, `reflectionAmount`), { responseType: 'json' })
 	).data;
 }
 
