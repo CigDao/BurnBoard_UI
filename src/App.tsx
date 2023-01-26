@@ -37,6 +37,10 @@ const client = createClient({
 		['treasury']: {
 			canisterId: canisterIds.treasuryCanisterId,
 			idlFactory: treasuryIdl
+		},
+		['taxcollector']: {
+			canisterId: canisterIds.tokenCanisterId,
+			idlFactory: taxcollectorIdl
 		}
 	},
 	providers: [new PlugWallet(), new StoicWallet(), new NFID()]
