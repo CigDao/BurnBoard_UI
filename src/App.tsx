@@ -12,7 +12,6 @@ import { idlFactory as daoIdl } from './declarations/dao';
 import { idlFactory as tokenIdl } from './declarations/token';
 import { idlFactory as ledgerIdl } from './declarations/ledger';
 import { idlFactory as treasuryIdl } from './declarations/treasury';
-import { idlFactory as taxcollectorIdl } from './declarations/taxcollector';
 
 
 const client = createClient({
@@ -38,10 +37,6 @@ const client = createClient({
 			canisterId: canisterIds.treasuryCanisterId,
 			idlFactory: treasuryIdl
 		},
-		['taxcollector']: {
-			canisterId: canisterIds.tokenCanisterId,
-			idlFactory: taxcollectorIdl
-		}
 	},
 	providers: [new PlugWallet(), new StoicWallet(), new NFID()]
 });

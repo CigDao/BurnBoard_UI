@@ -3,7 +3,6 @@ import http, { CombinedReflection, Reflection, Transaction } from '@utils/http';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '@assets/images/cig_logo.png';
-import { _SERVICE as _TAXCOLLECTOR_ACTOR } from '../../declarations/taxcollector';
 import { _SERVICE as _tokenService } from '../../declarations/token';
 import Confetti from 'react-confetti'
 import Loading from '@components/Loading/Loading';
@@ -30,8 +29,6 @@ export default function Dashboard() {
 	const [isButtonsLoading, setButtonsLoading] = useState(false);
 
 	const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
-	const [_taxcollectorActor] = useCanister('taxcollector');
-	const taxCollectorActor = _taxcollectorActor as unknown as _TAXCOLLECTOR_ACTOR;
 	const [_tokenActor] = useCanister('token');
 	const tokenActor = _tokenActor as unknown as _tokenService;
 	const { isConnected, principal } = useConnect();
@@ -48,7 +45,7 @@ export default function Dashboard() {
 
 	async function getBurnAmount() {
 		const innerPrincipal = Principal.fromText(principal || "");
-		const promises = await Promise.all([taxCollectorActor.getBurner(innerPrincipal), taxCollectorActor.fetchTopBurners()]);
+		const promises = await Promise.all([tokenActor.getBurner(innerPrincipal), tokenActor.fetchTopBurners()]);
 		const burn = promises[0];
 		const earnedAmount = burn[0]?.earnedAmount || 0n;
 		const burnedAmount = burn[0]?.burnedAmount || 0n;

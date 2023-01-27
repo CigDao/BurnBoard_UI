@@ -1,21 +1,20 @@
 import * as React from 'react';
-import { DataGrid, GridColDef, GridToolbar, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarFilterButton, GridToolbarQuickFilter, GridValueGetterParams } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridToolbar, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarExport, GridToolbarFilterButton, GridToolbarQuickFilter, GridValueGetterParams } from '@mui/x-data-grid';
 import { Paper, Typography, useMediaQuery } from '@mui/material';
 import { useCanister, useConnect } from '@connect2ic/react';
 import { _SERVICE as _TAXCOLLECTOR_ACTOR } from '../../declarations/taxcollector';
 import { bigIntToDecimalPrettyString } from '@utils/util';
 import { AvatarGenerator } from 'random-avatar-generator';
 import { theme } from '@misc/theme';
-
+import { _SERVICE as _tokenService } from '../../declarations/token';
 
 export default function BurnTable() {
   const [page, setPage] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(50);
   const [loading, setLoading] = React.useState(true);
   const [rows, setRows] = React.useState<any[]>([]);
-
-	const [_taxcollectorActor] = useCanister('taxcollector');
-	const taxCollectorActor = _taxcollectorActor as unknown as _TAXCOLLECTOR_ACTOR;
+	const [_tokenActor] = useCanister('token');
+	const tokenActor = _tokenActor as unknown as _tokenService;
   const [rowCountState, setRowCountState] = React.useState (0);
   const generator = new AvatarGenerator();
 	const { principal } = useConnect();
@@ -43,7 +42,7 @@ export default function BurnTable() {
 
 
   async function intialize() {
-    const burnerCount = await taxCollectorActor.getBurnerCount();
+    const burnerCount = await tokenActor.getBurnerCount();
     setRowCountState(Number(burnerCount));
     await nextPage(0);
   }
@@ -51,7 +50,7 @@ export default function BurnTable() {
 
   async function nextPage(page: number) {
     const start = page === 0 ? 0 : page + pageSize;
-    const burnerPage = await taxCollectorActor.fetchBurners(BigInt(start), BigInt(pageSize));
+    const burnerPage = await tokenActor.fetchBurners(BigInt(start), BigInt(pageSize));
     const innerRow: any[] = [];
     for (let index = 0; index < burnerPage.length; index++) {
       const burner = burnerPage[index];
