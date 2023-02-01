@@ -51,7 +51,7 @@ export interface TokenInfo {
   'cycles' : bigint,
   'feeTo' : Principal,
 };
-export type TxReceipt = { 'Ok' : bigint } |
+export type TxReceipt = { 'Ok' : string } |
   {
     'Err' : { 'InsufficientAllowance' : null } |
       { 'InsufficientBalance' : null } |
@@ -124,7 +124,7 @@ export interface _SERVICE {
 
 export const idlFactory = ({ IDL }: any) => {
 	const TxReceipt = IDL.Variant({
-	  'Ok' : IDL.Nat,
+	  'Ok' : IDL.Text,
 	  'Err' : IDL.Variant({
 		'InsufficientAllowance' : IDL.Null,
 		'InsufficientBalance' : IDL.Null,
